@@ -12,14 +12,23 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-function loadItems() {
-    const items = [
-        {id:1, name: "Yumurta", completed: false },
-        {id:2, name: "Balık", completed: true },
-        {id:3, name: "Süt", completed: false },
-        {id:4, name: "Zeytin", completed: false },
-    ];
+function saveToLS() {
+    const listItems = shoppingList.querySelectorAll("li");
+    const liste = [];
+    
+    for(let li of listItems) {
+        const id = li.getAttribute("item-id");
+        const name = li.querySelector(".item-name").textContent;
+        const completed = li.hasAttribute("item-completed");
 
+        liste.push({ id, name, completed});
+    }
+
+    localStorage.setItem("shoppingItems", JSON.stringify(liste));
+}
+
+function loadItems() {
+    const items = JSON.parse(localStorage.getItem("shoppingItems"))  || [];
     shoppingList.innerHTML = "";
 
     for(let item of items) {
@@ -42,10 +51,25 @@ function addItem(input) {
     input.value = "";
 
     updateFilteredItems();
+
+    saveToLS();
 }
 
 function generateId() {
     return Date.now().toString();
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+
+    const input = document.getElementById("item_name");
+
+    if(input.value.trim().length === 0) {
+        alert("yeni değer giriniz");
+        return;
+    }
+
+    addItem(input);
 }
 
 function toggleCompleted(e) {
@@ -53,6 +77,8 @@ function toggleCompleted(e) {
     li.toggleAttribute("item-completed", e.target.checked);
 
     updateFilteredItems();
+
+    saveToLS();
 }
 
 function createListItem(item) {
@@ -78,6 +104,7 @@ function createListItem(item) {
 
     // li
     const li = document.createElement("li");
+    li.setAttribute("item-id", item.id);
     li.className = "border rounded p-2 mb-1";
     li.toggleAttribute("item-completed", item.completed);
 
@@ -88,22 +115,11 @@ function createListItem(item) {
     return li;
 }
 
-function handleFormSubmit(e) {
-    e.preventDefault();
-
-    const input = document.getElementById("item_name");
-
-    if(input.value.trim().length === 0) {
-        alert("yeni değer giriniz");
-        return;
-    }
-
-    addItem(input);
-}
-
 function removeItem(e) {
     const li = e.target.parentElement;
     shoppingList.removeChild(li);
+
+    saveToLS();
 }
 
 function openEditMode(e) {
@@ -115,6 +131,8 @@ function openEditMode(e) {
 
 function closeEditMode(e) {
     e.target.contentEditable = false;
+
+    saveToLS();
 }
 
 function cancelEnter(e) {
