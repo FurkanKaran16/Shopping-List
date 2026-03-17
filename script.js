@@ -89,7 +89,7 @@ function handleFormSubmit(e) {
     const input = document.getElementById("item_name");
 
     if(input.value.trim().length === 0) {
-        alert("yeni değer giriniz");
+        alert("Enter a new item.");
         return;
     }
 
